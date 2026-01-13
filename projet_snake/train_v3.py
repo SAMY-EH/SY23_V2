@@ -40,9 +40,8 @@ SAVE_FREQ = 200000
 # --- BLOCK MAIN OBLIGATOIRE SUR MAC ---
 if __name__ == "__main__":
     
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    MODELS_DIR = os.path.join(script_dir, "checkpoints/PPO_CNN_MULTI")
-    LOG_DIR = os.path.join(script_dir, "logs")
+    MODELS_DIR = "SY23_V2/projet_snake/checkpoints/PPO_CNN_MULTI"
+    LOG_DIR = "SY23_V2/projet_snake/logs"
     
     os.makedirs(MODELS_DIR, exist_ok=True)
     os.makedirs(LOG_DIR, exist_ok=True)

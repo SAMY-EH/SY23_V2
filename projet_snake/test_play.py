@@ -4,8 +4,7 @@ from stable_baselines3 import PPO
 from envs.snake_env import SnakeEnv
 import time
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-def lister_modeles(dossier_racine=os.path.join(script_dir, "checkpoints")):
+def lister_modeles(dossier_racine="SY23_V2/projet_snake/checkpoints"):
     """Récupère tous les fichiers .zip dans les sous-dossiers"""
     liste_fichiers = []
     # On cherche récursivement dans tous les dossiers
@@ -34,7 +33,7 @@ def main():
     # 2. Afficher le menu
     for i, f in enumerate(fichiers):
         # On affiche juste le nom du fichier pour que ce soit lisible, pas tout le chemin
-        nom_lisible = f.replace("checkpoints/", "") 
+        nom_lisible = f.replace("SY23_V2/projet_snake/checkpoints/", "") 
         print(f"[{i}] {nom_lisible}")
     
     # 3. Choix de l'utilisateur

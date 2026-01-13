@@ -50,6 +50,9 @@ class SnakeEnvCnn(gym.Env):
             shape=(1, self.grid_h, self.grid_w), 
             dtype=np.uint8
         )
+        
+        # Pour le reward shaping
+        self.prev_distance = None
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -61,7 +64,12 @@ class SnakeEnvCnn(gym.Env):
         self.score = 0
         self.frame_iteration = 0
         self._place_food()
+        self.prev_distance = self._get_distance()
         return self._get_observation(), {}
+
+    def _get_distance(self):
+        """Distance de Manhattan entre la tête et la pomme"""
+        return abs(self.head[0] - self.food[0]) + abs(self.head[1] - self.food[1])
 
     def step(self, action):
         self.frame_iteration += 1
@@ -70,19 +78,33 @@ class SnakeEnvCnn(gym.Env):
         game_over = False
         reward = 0
         
-        # Collision
+        # Collision = Game Over
         if self._is_collision() or self.frame_iteration > 100*len(self.snake):
             game_over = True
             reward = -10
             return self._get_observation(), reward, game_over, False, {}
-            
-        # Manger
+        
+        # Calculer la nouvelle distance
+        new_distance = self._get_distance()
+        
+        # Manger la pomme = grosse récompense
         if self.head == self.food:
             self.score += 1
-            reward = 10
+            reward = 20  # Augmenté de 10 à 20
             self._place_food()
+            self.prev_distance = self._get_distance()
         else:
             self.snake.pop()
+            
+            # REWARD SHAPING : Récompense/punition basée sur la distance
+            # Se rapprocher = +1, s'éloigner = -1
+            if new_distance < self.prev_distance:
+                reward = 1  # Se rapproche de la pomme
+            elif new_distance > self.prev_distance:
+                reward = -1  # S'éloigne de la pomme
+            # Sinon reward = 0 (même distance)
+            
+            self.prev_distance = new_distance
             
         if self.render_mode == "human":
             self._render_frame()
