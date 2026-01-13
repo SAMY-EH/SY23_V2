@@ -1,3 +1,6 @@
+# Python 3.12 recommandé pour éviter les problèmes de compatibilité
+# Installer avec: pip install -r requirements.txt
+
 gymnasium>=1.0.0
 pygame>=2.6.0
 stable-baselines3>=2.0.0

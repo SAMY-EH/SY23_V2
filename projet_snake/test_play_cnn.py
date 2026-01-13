@@ -1,14 +1,20 @@
 import os
 import glob
 import time
+
+# FIX macOS segfault: Configuration PyTorch AVANT tout import
+import torch as th
+import torch.nn as nn
+th.set_num_threads(1)
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+
 from stable_baselines3 import PPO
 from envs.snake_env_cnn import SnakeEnvCnn
 
 # IMPORTANT : On doit redéfinir la classe CustomCNN ici aussi
 # pour que Python puisse charger le modèle sauvegardé.
 # (Dans un vrai projet, on mettrait cette classe dans un fichier 'utils.py' importé partout)
-import torch as th
-import torch.nn as nn
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from gymnasium import spaces
 
@@ -54,7 +60,7 @@ def main():
     
     print("Début de la démo CNN...")
     while True:
-        action, _ = model.predict(obs)
+        action, _ = model.predict(obs, deterministic=True)
         obs, reward, done, truncated, info = env.step(action)
         
         # Ralentir un peu pour admirer

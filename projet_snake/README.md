@@ -2,7 +2,7 @@
 
 Un projet d'intelligence artificielle qui apprend à jouer au jeu Snake en utilisant le **Reinforcement Learning** avec l'algorithme **PPO** (Proximal Policy Optimization).
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Stable Baselines3](https://img.shields.io/badge/Stable--Baselines3-2.0+-green)
 ![Gymnasium](https://img.shields.io/badge/Gymnasium-1.0+-orange)
 ![Pygame](https://img.shields.io/badge/Pygame-2.6+-red)

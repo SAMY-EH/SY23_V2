@@ -209,6 +209,7 @@ class SnakeEnv(gym.Env):
             pygame.display.set_caption("🐍 Snake AI Training 🐍")
         
         # Fond
+        pygame.event.pump()
         self.window.fill(BLACK)
         
         # Grille légère en arrière-plan (optionnel, pour voir les cases)
