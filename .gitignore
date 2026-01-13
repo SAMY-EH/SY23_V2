@@ -1,0 +1,31 @@
+# Modèles et checkpoints (trop volumineux)
+checkpoints/
+**/checkpoints/
+*.zip
+
+# Logs TensorBoard
+logs/
+**/logs/
+logs_mario/
+
+# Environnements virtuels
+.venv/
+.venv_312/
+**/.venv*/
+venv/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
