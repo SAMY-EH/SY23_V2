@@ -33,7 +33,9 @@ class CustomCNN(BaseFeaturesExtractor):
 
 def main():
     # 1. Trouver le dernier modèle CNN
-    list_of_files = glob.glob('SY23_V2/projet_snake/checkpoints/PPO_CNN/*.zip')
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    MODELS_DIR = os.path.join(SCRIPT_DIR, "checkpoints/PPO_CNN")
+    list_of_files = glob.glob(os.path.join(MODELS_DIR, "snake_cnn_*.zip"))
     if not list_of_files:
         print("Pas de modèle CNN trouvé !")
         return

@@ -3,8 +3,9 @@ from stable_baselines3 import PPO
 from envs.snake_env import SnakeEnv
 
 # 1. Création des dossiers pour sauvegarder les modèles et les logs
-models_dir = "SY23_V2/projet_snake/checkpoints/PPO"
-log_dir = "SY23_V2/projet_snake/logs"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+models_dir = os.path.join(SCRIPT_DIR, "checkpoints/PPO")
+log_dir = os.path.join(SCRIPT_DIR, "logs")
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)

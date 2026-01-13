@@ -4,8 +4,9 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from envs.snake_env import SnakeEnv
 
 # --- CONFIGURATION v2 ---
-MODELS_DIR = "SY23_V2/projet_snake/checkpoints/PPO_v2"
-LOG_DIR = "SY23_V2/projet_snake/logs"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(SCRIPT_DIR, "checkpoints/PPO_v2")
+LOG_DIR = os.path.join(SCRIPT_DIR, "logs")
 TIMESTEPS = 2000000  # 2 Millions de pas (environ 20-30 min sur Mac M1/M2)
 SAVE_FREQ = 100000   # Sauvegarder une copie du cerveau tous les 100k pas
 

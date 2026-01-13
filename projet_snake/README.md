@@ -2,10 +2,10 @@
 
 Un projet d'intelligence artificielle qui apprend à jouer au jeu Snake en utilisant le **Reinforcement Learning** avec l'algorithme **PPO** (Proximal Policy Optimization).
 
-![Python](https://img.shields.io/badge/Python-3.14-blue)
-![Stable Baselines3](https://img.shields.io/badge/Stable--Baselines3-2.7.1-green)
-![Gymnasium](https://img.shields.io/badge/Gymnasium-1.2.3-orange)
-![Pygame](https://img.shields.io/badge/Pygame-2.6.1-red)
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Stable Baselines3](https://img.shields.io/badge/Stable--Baselines3-2.0+-green)
+![Gymnasium](https://img.shields.io/badge/Gymnasium-1.0+-orange)
+![Pygame](https://img.shields.io/badge/Pygame-2.6+-red)
 
 ---
 
@@ -38,15 +38,18 @@ L'apprentissage utilise l'algorithme **PPO** de la librairie Stable-Baselines3, 
 projet_snake/
 ├── envs/                       # Environnements Gymnasium
 │   ├── __init__.py
-│   ├── snake_env.py           # Env V1 : Observation = vecteur 11 valeurs
+│   ├── snake_env.py           # Env V1 : Observation = vecteur 11 valeurs (MLP)
 │   └── snake_env_cnn.py       # Env V2 : Observation = grille 30x30 (CNN)
 ├── checkpoints/               # Modèles sauvegardés (.zip)
-│   └── PPO/
+│   ├── PPO/                   # Modèles MLP
+│   └── PPO_CNN/               # Modèles CNN
 ├── logs/                      # Logs TensorBoard
-├── train_v1.py               # Entraînement basique (100k steps)
-├── train_v2.py               # Entraînement avancé (2M steps)
-├── train_v3.py               # Entraînement CNN
-├── test_play.py              # Visualiser l'IA jouer
+├── train_v1.py               # Entraînement basique MLP (100k steps)
+├── train_v2.py               # Entraînement avancé MLP (500k steps)
+├── train_v3.py               # Entraînement CNN avec parallélisation
+├── train_colab.ipynb         # Notebook pour Google Colab (GPU)
+├── test_play.py              # Visualiser l'IA MLP jouer
+├── test_play_cnn.py          # Visualiser l'IA CNN jouer
 ├── check_env.py              # Vérifier l'environnement
 ├── requirements.txt          # Dépendances Python
 └── README.md
@@ -58,8 +61,8 @@ projet_snake/
 
 ### 1. Cloner le projet
 ```bash
-git clone https://github.com/SAMY-EH/SY23P.git
-cd SY23P/projet_ultra_secret/projet_snake
+git clone https://github.com/SAMY-EH/SY23_V2.git
+cd SY23_V2/projet_snake
 ```
 
 ### 2. Créer un environnement virtuel
@@ -87,20 +90,24 @@ pip install -r requirements.txt
 ### Entraîner l'IA
 
 ```bash
-# Entraînement basique (100 000 steps) - ~5 min
+# Entraînement MLP basique (100 000 steps) - ~5 min
 python train_v1.py
 
-# Entraînement avancé (500 000 steps) - ~20 min
+# Entraînement MLP avancé (500 000 steps) - ~20 min
 python train_v2.py
 
-# Entraînement avec CNN (plus lent mais potentiellement meilleur)
+# Entraînement CNN avec parallélisation (plus lent mais plus général)
 python train_v3.py
 ```
 
 ### Voir l'IA jouer
 
 ```bash
+# Version MLP (vecteur 11 valeurs)
 python test_play.py
+
+# Version CNN (grille 30x30)
+python test_play_cnn.py
 ```
 
 Un menu s'affiche pour choisir le modèle à charger parmi ceux disponibles dans `checkpoints/`.
@@ -112,31 +119,60 @@ tensorboard --logdir=logs
 ```
 Puis ouvrir http://localhost:6006 dans un navigateur.
 
+### Entraînement sur Google Colab (GPU)
+
+1. Ouvrir `train_colab.ipynb` sur Google Colab
+2. Activer le GPU : `Exécution > Modifier le type d'exécution > T4 GPU`
+3. Exécuter les cellules dans l'ordre
+
 ---
 
 ## 🌍 Environnements
 
-### `SnakeEnv` (snake_env.py)
-- **Observation** : Vecteur de 11 valeurs binaires
-  - 3 valeurs : Danger (tout droit, droite, gauche)
-  - 4 valeurs : Direction actuelle (G, D, H, B)
-  - 4 valeurs : Position relative de la pomme (G, D, H, B)
-- **Actions** : 4 (Gauche, Droite, Haut, Bas)
-- **Récompenses** :
-  - +10 : Manger une pomme
-  - -10 : Collision (mur ou queue)
+### `SnakeEnv` (snake_env.py) - Version MLP
 
-### `SnakeEnvCnn` (snake_env_cnn.py)
-- **Observation** : Image 30x30 en niveaux de gris
-  - 0 : Case vide
-  - 80 : Corps du serpent
-  - 180 : Tête
-  - 255 : Pomme
-- **Réseau** : CNN (CnnPolicy) pour traiter l'image
+| Caractéristique | Description |
+|-----------------|-------------|
+| **Observation** | Vecteur de 11 valeurs binaires |
+| **Espace** | `Box(0, 1, shape=(11,), dtype=int8)` |
+| **Actions** | 4 : Gauche, Droite, Haut, Bas |
+
+**Détail du vecteur d'observation :**
+- 3 valeurs : Danger (tout droit, droite, gauche)
+- 4 valeurs : Direction actuelle (G, D, H, B)
+- 4 valeurs : Position relative de la pomme (G, D, H, B)
+
+**Récompenses :**
+- `+10` : Manger une pomme
+- `-10` : Collision (mur ou queue)
+
+---
+
+### `SnakeEnvCnn` (snake_env_cnn.py) - Version CNN
+
+| Caractéristique | Description |
+|-----------------|-------------|
+| **Observation** | Grille 30x30 en niveaux de gris |
+| **Espace** | `Box(0, 255, shape=(1, 30, 30), dtype=uint8)` |
+| **Actions** | 4 : Gauche, Droite, Haut, Bas |
+
+**Valeurs de la grille :**
+- `0` : Case vide (noir)
+- `80` : Corps du serpent (gris foncé)
+- `180` : Tête du serpent (gris clair)
+- `255` : Pomme (blanc)
+
+**Récompenses avec reward shaping :**
+- `+20` : Manger une pomme
+- `-10` : Collision (mur ou queue)
+- `+1` : Se rapprocher de la pomme
+- `-1` : S'éloigner de la pomme
 
 ---
 
 ## 🧠 Architecture du modèle
+
+### Version MLP (train_v1.py, train_v2.py)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -154,15 +190,31 @@ Puis ouvrir http://localhost:6006 dans un navigateur.
 └─────────────────────────────────────────────────────┘
 ```
 
+### Version CNN (train_v3.py)
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 Custom CNN Extractor                │
+├─────────────────────────────────────────────────────┤
+│  Conv2D(1 → 32, kernel=3, stride=2) + ReLU         │
+│  Conv2D(32 → 64, kernel=3, stride=2) + ReLU        │
+│  Conv2D(64 → 64, kernel=3, stride=1) + ReLU        │
+│  Flatten → Linear → 128 features                   │
+├─────────────────────────────────────────────────────┤
+│  Policy Head: 128 → 4 (actions)                    │
+│  Value Head: 128 → 1 (state value)                 │
+└─────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 📊 Résultats
 
-| Version | Steps | Score Moyen | Temps |
-|---------|-------|-------------|-------|
-| V1 (MLP) | 100k | ~5-10 | 5 min |
-| V2 (MLP) | 500k | ~15-25 | 20 min |
-| V3 (CNN) | 1M | ~20-30 | 1h+ |
+| Version | Environnement | Steps | Score Moyen | Temps |
+|---------|---------------|-------|-------------|-------|
+| V1 (MLP) | SnakeEnv | 100k | ~5-10 | ~5 min |
+| V2 (MLP) | SnakeEnv | 500k | ~15-25 | ~20 min |
+| V3 (CNN) | SnakeEnvCnn | 1M+ | ~20-30 | 1h+ (GPU recommandé) |
 
 > Les résultats peuvent varier selon les hyperparamètres et la configuration matérielle.
 
@@ -171,19 +223,19 @@ Puis ouvrir http://localhost:6006 dans un navigateur.
 ## 🛠️ Technologies utilisées
 
 - **[Gymnasium](https://gymnasium.farama.org/)** : Framework pour environnements RL
-- **[Stable-Baselines3](https://stable-baselines3.readthedocs.io/)** : Algorithmes RL (PPO, DQN, A2C...)
+- **[Stable-Baselines3](https://stable-baselines3.readthedocs.io/)** : Algorithmes RL (PPO)
 - **[PyTorch](https://pytorch.org/)** : Backend deep learning
 - **[Pygame](https://www.pygame.org/)** : Rendu graphique du jeu
 - **[TensorBoard](https://www.tensorflow.org/tensorboard)** : Visualisation des métriques
 
 ---
 
-## 📝 Auteur
+## 📝 Auteurs
 
-**Samy E et Willen A** - Projet SY23 - Janvier 2026
+**Samy E. et Willen A.** - Projet SY23 - UTC - Janvier 2026
 
 ---
 
 ## 📜 Licence
 
-Ce projet est réalisé dans le cadre d'un cours universitaire.
+Ce projet est réalisé dans le cadre d'un cours universitaire (SY23 - UTC).
